@@ -217,8 +217,8 @@ function getEmojiForNominee(nominee, nomineeEmojis = {}) {
     return "🎬";
 }
 
-// Category order for the show (technical awards first, building to Best Picture)
-const CATEGORY_ORDER = [
+// Fallback category order (used if Presentation Order not in Airtable)
+const FALLBACK_CATEGORY_ORDER = [
     "Casting",
     "Documentary Feature Film",
     "Animated Feature Film",
@@ -257,6 +257,8 @@ class OscarRaffle {
         this.currentCategoryIndex = 0;
         this.currentCategory = null;
         this.currentOscarWinner = null;
+        // Dynamic category order from Airtable (falls back to FALLBACK_CATEGORY_ORDER)
+        this.categoryOrder = [...FALLBACK_CATEGORY_ORDER];
 
         // Load persisted state
         this.loadWinnersData();
@@ -483,12 +485,27 @@ class OscarRaffle {
             console.log('Using fallback nominees data');
         }
 
-        // Process categories (for prize lookup)
+        // Process categories (for prize lookup and presentation order)
         this.categories = categoriesData.map(record => ({
             id: record.id,
             name: record.fields['Category Name'],
-            prize: record.fields['Prize'] || 'TBD'
+            prize: record.fields['Prize'] || 'TBD',
+            presentationOrder: record.fields['Presentation Order'] || 999
         })).filter(c => c.name);
+
+        // Build category order from Presentation Order field
+        const categoriesWithOrder = this.categories.filter(c => c.presentationOrder !== 999);
+        if (categoriesWithOrder.length > 0) {
+            // Sort by presentation order and extract names
+            this.categoryOrder = [...this.categories]
+                .sort((a, b) => a.presentationOrder - b.presentationOrder)
+                .map(c => c.name);
+            console.log('Loaded category order from Airtable:', this.categoryOrder);
+        } else {
+            // Use fallback order
+            this.categoryOrder = [...FALLBACK_CATEGORY_ORDER];
+            console.log('Using fallback category order');
+        }
 
         // Process submissions
         this.submissions = submissionsData.map(record => ({
@@ -522,7 +539,7 @@ class OscarRaffle {
     buildProgressBar() {
         // Build progress segments
         this.elements.progressSegments.innerHTML = '';
-        CATEGORY_ORDER.forEach((cat, index) => {
+        this.categoryOrder.forEach((cat, index) => {
             const segment = document.createElement('div');
             segment.className = 'progress-segment';
             segment.dataset.index = index;
@@ -540,7 +557,7 @@ class OscarRaffle {
     updateProgressBar() {
         const segments = this.elements.progressSegments.querySelectorAll('.progress-segment');
         segments.forEach((seg, index) => {
-            const categoryName = CATEGORY_ORDER[index];
+            const categoryName = this.categoryOrder[index];
             seg.classList.remove('completed', 'current');
             if (this.completedCategories[categoryName]) {
                 seg.classList.add('completed');
@@ -553,13 +570,13 @@ class OscarRaffle {
         // Note: gold coloring is now segment-based via CSS .completed class
 
         // Update progress label
-        const currentCat = CATEGORY_ORDER[this.currentCategoryIndex];
-        this.elements.progressCount.textContent = `${this.currentCategoryIndex + 1}/${CATEGORY_ORDER.length}`;
+        const currentCat = this.categoryOrder[this.currentCategoryIndex];
+        this.elements.progressCount.textContent = `${this.currentCategoryIndex + 1}/${this.categoryOrder.length}`;
         this.elements.progressCategoryName.textContent = currentCat;
     }
 
     showCurrentCategory() {
-        const categoryName = CATEGORY_ORDER[this.currentCategoryIndex];
+        const categoryName = this.categoryOrder[this.currentCategoryIndex];
         this.currentCategory = this.categories.find(c => c.name === categoryName) || { name: categoryName, prize: 'TBD' };
 
         // Update progress bar
@@ -785,7 +802,7 @@ class OscarRaffle {
 
     updateNavButtons() {
         const isFirstCategory = this.currentCategoryIndex === 0;
-        const isLastCategory = this.currentCategoryIndex >= CATEGORY_ORDER.length - 1;
+        const isLastCategory = this.currentCategoryIndex >= this.categoryOrder.length - 1;
 
         this.elements.prevCategoryButton.disabled = isFirstCategory;
         this.elements.nextCategoryButton.textContent = isLastCategory ? '🎬 Wrap!' : 'Next →';
@@ -805,7 +822,7 @@ class OscarRaffle {
     }
 
     nextCategory() {
-        if (this.currentCategoryIndex < CATEGORY_ORDER.length - 1) {
+        if (this.currentCategoryIndex < this.categoryOrder.length - 1) {
             this.currentCategoryIndex++;
             this.saveCurrentCategoryIndex();
             this.showCurrentCategory();
@@ -1268,7 +1285,7 @@ class OscarRaffle {
     resetWinners() {
         if (confirm('Reset all raffle winners AND go back to first category?')) {
             // Clear all categories from Airtable
-            CATEGORY_ORDER.forEach(categoryName => {
+            this.categoryOrder.forEach(categoryName => {
                 this.clearCategoryInAirtable(categoryName);
             });
 
@@ -1285,7 +1302,7 @@ class OscarRaffle {
     }
 
     resetCurrentCategory() {
-        const categoryName = CATEGORY_ORDER[this.currentCategoryIndex];
+        const categoryName = this.categoryOrder[this.currentCategoryIndex];
         const completed = this.completedCategories[categoryName];
 
         if (!completed) return; // Nothing to reset
@@ -1328,17 +1345,45 @@ class OscarRaffle {
         this.elements.refreshButton.classList.add('spinning');
         this.elements.refreshButton.disabled = true;
 
+        // Show updating message
+        this.showRefreshStatus('Updating...', 'pending');
+
         try {
             await this.loadData();
+            // Rebuild progress bar with potentially new category order
+            this.buildProgressBar();
             // Re-render current view with fresh data
             this.showCurrentCategory();
             console.log('Data refreshed successfully');
+            this.showRefreshStatus('Data updated successfully!', 'success');
         } catch (error) {
             console.error('Failed to refresh data:', error);
-            alert('Failed to refresh data: ' + error.message);
+            this.showRefreshStatus('Update failed: ' + error.message, 'error');
         } finally {
             this.elements.refreshButton.classList.remove('spinning');
             this.elements.refreshButton.disabled = false;
+        }
+    }
+
+    showRefreshStatus(message, type) {
+        // Remove any existing status message
+        const existing = document.querySelector('.refresh-status');
+        if (existing) existing.remove();
+
+        // Create status element
+        const status = document.createElement('div');
+        status.className = `refresh-status refresh-status-${type}`;
+        status.textContent = message;
+
+        // Insert into body (positioned via CSS)
+        document.body.appendChild(status);
+
+        // Auto-remove success/error messages after a delay
+        if (type !== 'pending') {
+            setTimeout(() => {
+                status.classList.add('fade-out');
+                setTimeout(() => status.remove(), 300);
+            }, 3000);
         }
     }
 
