@@ -1,0 +1,15 @@
+# Config file with API keys - DO NOT COMMIT
+config.js
+
+# Node modules (if any)
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo

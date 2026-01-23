@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roco Oscar Party 2026</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Refresh Data Button -->
+    <button id="refresh-data" class="refresh-button" title="Refresh Airtable data">
+        <span class="refresh-icon">↻</span>
+    </button>
+
+    <!-- All Voters Toggle Button -->
+    <button id="voters-toggle" class="voters-toggle">
+        <span class="toggle-icon">📋</span>
+        <span class="toggle-label">All Voters</span>
+    </button>
+
+    <!-- Sidebar Toggle Button -->
+    <button id="sidebar-toggle" class="sidebar-toggle">
+        <span class="toggle-icon">👥</span>
+        <span class="toggle-label">Winners</span>
+    </button>
+
+    <!-- All Voters Sidebar -->
+    <aside id="voters-sidebar" class="voters-sidebar">
+        <div class="sidebar-header">
+            <h2>All Voters</h2>
+            <button id="voters-close" class="sidebar-close">&times;</button>
+        </div>
+        <div class="voters-count">
+            <span id="voters-count-number">0</span> submissions
+        </div>
+        <div id="voters-list" class="voters-list">
+            <p class="no-voters-yet">Loading voters...</p>
+        </div>
+    </aside>
+    <div id="voters-overlay" class="sidebar-overlay"></div>
+
+    <!-- Winners Sidebar -->
+    <aside id="winners-sidebar" class="winners-sidebar">
+        <div class="sidebar-header">
+            <h2>Previous Winners</h2>
+            <button id="sidebar-close" class="sidebar-close">&times;</button>
+        </div>
+        <p class="sidebar-hint">Uncheck to allow back in raffle</p>
+        <div id="sidebar-winners-list" class="sidebar-winners-list">
+            <p class="no-winners-yet">No winners yet</p>
+        </div>
+    </aside>
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="title">Roco Oscar Party 2026</h1>
+            <p class="subtitle">May the odds be ever in your favor</p>
+        </header>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading data from Airtable...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error" class="error hidden">
+            <h2>Connection Error</h2>
+            <p id="error-message"></p>
+            <button onclick="location.reload()">Try Again</button>
+        </div>
+
+        <!-- Main Content -->
+        <main id="main-content" class="main-content hidden">
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span id="progress-count" class="progress-count">1/21</span>
+                    <span id="progress-category-name" class="progress-category-name">Casting</span>
+                </div>
+                <div id="progress-bar" class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                    <div id="progress-segments" class="progress-segments">
+                        <!-- Segments populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two-column steps container -->
+            <div class="steps-container">
+                <!-- Step 1: Current Category & Select Winner -->
+                <section class="step-section">
+                    <div class="step-header">
+                        <span class="step-number">1</span>
+                        <span class="step-title">Select Oscar Winner</span>
+                    </div>
+                    <div class="info-card">
+                        <div class="oscar-icon">🏆</div>
+                        <h2 id="category-name" class="category-name"></h2>
+                    </div>
+
+                    <p class="instruction">Who won this Oscar?</p>
+                    <div id="nominee-buttons" class="nominee-buttons">
+                        <!-- Nominee buttons populated here -->
+                    </div>
+
+                    <!-- Reset This Category -->
+                    <div id="reset-category-section" class="reset-category-section hidden">
+                        <button id="reset-category-button" class="reset-category-button">
+                            ↺ Reset This Category
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Step 2: Show Correct Guesses & Spin (shown after winner selection) -->
+                <section id="raffle-section" class="step-section hidden">
+                    <div class="step-header">
+                        <span class="step-number">2</span>
+                        <span class="step-title">Raffle Time!</span>
+                    </div>
+
+                    <div class="winner-announcement-box">
+                        <span class="label">Oscar Winner:</span>
+                        <span id="oscar-winner" class="oscar-winner"></span>
+                    </div>
+
+                    <!-- Eligible Guests -->
+                    <div class="eligible-section">
+                        <div class="eligible-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Correct Guesses:</span>
+                                <span id="correct-count" class="stat-value">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Eligible for Prize:</span>
+                                <span id="eligible-count" class="stat-value highlight">0</span>
+                            </div>
+                        </div>
+                        <div id="eligible-list" class="eligible-list">
+                            <!-- Names populated here -->
+                        </div>
+                        <p id="no-guesses-message" class="no-guesses-message hidden">
+                            Nobody guessed correctly! Move to next category.
+                        </p>
+                    </div>
+
+                    <!-- Spin Section -->
+                    <div id="spin-section" class="spin-section hidden">
+                        <button id="spin-button" class="spin-button">
+                            🎰 SPIN TO WIN
+                        </button>
+                        <button id="spin-again-button" class="spin-button spin-again hidden">
+                            🔄 SPIN AGAIN
+                        </button>
+
+                        <!-- Spinner Wheel Display -->
+                        <div id="spinner-display" class="spinner-display hidden">
+                            <div class="spinner-wheel-container">
+                                <div class="spinner-pointer">▼</div>
+                                <div id="spinner-names" class="spinner-names">
+                                    <!-- Names will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Winner Announcement -->
+                        <div id="winner-announcement" class="winner-announcement hidden">
+                            <div class="confetti-container" id="confetti"></div>
+                            <div class="winner-card">
+                                <div class="winner-label">🎉 WINNER 🎉</div>
+                                <div id="raffle-winner" class="raffle-winner"></div>
+                            </div>
+                        </div>
+
+                        <!-- Randomness Proof (shows the cryptographic details) -->
+                        <div id="randomness-proof" class="randomness-proof hidden">
+                            <span class="proof-label">🔐 Randomness Proof:</span>
+                            <div class="proof-line">Crypto value: <span id="proof-crypto-value" class="proof-value"></span></div>
+                            <div class="proof-line">Pool size: <span id="proof-pool-size" class="proof-value"></span></div>
+                            <div class="proof-line">Selected index: <span id="proof-index" class="proof-value highlight"></span></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <section class="navigation-section">
+                <button id="prev-category-button" class="nav-button prev-button">
+                    ← Previous
+                </button>
+                <button id="next-category-button" class="nav-button next-button">
+                    Next →
+                </button>
+            </section>
+
+            <!-- Reset Button -->
+            <section class="reset-section">
+                <button id="reset-winners" class="reset-button">Reset All & Start Over</button>
+            </section>
+        </main>
+
+        <!-- Setup Required Message -->
+        <div id="setup-required" class="setup-required hidden">
+            <h2>Setup Required</h2>
+            <p>Please configure your Airtable credentials in <code>config.js</code></p>
+            <pre>
+const CONFIG = {
+    AIRTABLE_API_KEY: 'your_api_key_here',
+    AIRTABLE_BASE_ID: 'your_base_id_here'
+};
+            </pre>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="raffle.js"></script>
+</body>
+</html>
