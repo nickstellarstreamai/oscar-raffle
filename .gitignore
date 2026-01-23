@@ -1,6 +1,3 @@
-# Config file with API keys - DO NOT COMMIT
-config.js
-
 # Node modules (if any)
 node_modules/
 
