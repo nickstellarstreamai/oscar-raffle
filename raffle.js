@@ -806,7 +806,8 @@ class OscarRaffle {
             msgText.textContent = 'Nobody guessed correctly! Everyone is in the running!';
             guessersContainer.classList.add('hidden');
             guessersContainer.innerHTML = '';
-            this.elements.noGuessesMessage.classList.remove('hidden', 'all-won');
+            this.elements.noGuessesMessage.classList.remove('hidden');
+            this.elements.noGuessesMessage.classList.add('all-won');
         } else if (eligibleCorrectGuests.length === 0 && !freezeAfterSpin) {
             // All correct guessers have already won - open to everyone
             guestsToShow = this.submissions;
