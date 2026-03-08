@@ -47,7 +47,7 @@ const DEFAULT_EMOJIS = {
 
 // Fallback nominee list (used if Nominees table doesn't exist in Airtable)
 const FALLBACK_NOMINEES = {
-    "Picture": [
+    "Best Picture": [
         "Bugonia",
         "F1",
         "Frankenstein",
@@ -59,49 +59,49 @@ const FALLBACK_NOMINEES = {
         "Sinners",
         "Train Dreams"
     ],
-    "Directing": [
+    "Best Director": [
         "Ryan Coogler (Sinners)",
         "Paul Thomas Anderson (One Battle After Another)",
         "Chloé Zhao (Hamnet)",
         "Josh Safdie (Marty Supreme)",
         "Joachim Trier (Sentimental Value)"
     ],
-    "Actor in a Leading Role": [
+    "Best Actor": [
         "Michael B. Jordan (Sinners)",
         "Leonardo DiCaprio (One Battle After Another)",
         "Timothée Chalamet (Marty Supreme)",
         "Ethan Hawke (Blue Moon)",
         "Wagner Moura (The Secret Agent)"
     ],
-    "Actress in a Leading Role": [
+    "Best Actress": [
         "Jessie Buckley (Hamnet)",
         "Rose Byrne (If I Had Legs I'd Kick You)",
         "Renate Reinsve (Sentimental Value)",
         "Emma Stone (Bugonia)",
         "Kate Hudson (Song Sung Blue)"
     ],
-    "Actress in a Supporting Role": [
+    "Best Supporting Actress": [
         "Elle Fanning (Sentimental Value)",
         "Wunmi Mosaku (Sinners)",
         "Teyana Taylor (One Battle After Another)",
         "Inga Ibsdotter Lilleaas (Sentimental Value)",
         "Amy Madigan (Weapons)"
     ],
-    "Actor in a Supporting Role": [
+    "Best Supporting Actor": [
         "Benicio del Toro (One Battle After Another)",
         "Jacob Elordi (Frankenstein)",
         "Sean Penn (One Battle After Another)",
         "Stellan Skarsgård (Sentimental Value)",
         "Delroy Lindo (Sinners)"
     ],
-    "Adapted Screenplay": [
+    "Writing (Adapted Screenplay)": [
         "One Battle After Another",
         "Hamnet",
         "Frankenstein",
         "Train Dreams",
         "Bugonia"
     ],
-    "Original Screenplay": [
+    "Writing (Original Screenplay)": [
         "Sinners",
         "Marty Supreme",
         "Sentimental Value",
@@ -115,21 +115,21 @@ const FALLBACK_NOMINEES = {
         "The Secret Agent",
         "Sinners"
     ],
-    "Animated Feature Film": [
+    "Animated Feature": [
         "Arco",
         "Elio",
         "KPop Demon Hunters",
         "Little Amélie or the Character of Rain",
         "Zootopia 2"
     ],
-    "Documentary Feature Film": [
+    "Documentary": [
         "The Perfect Neighbor",
         "The Alabama Solution",
         "Come See Me in the Good Light",
         "Cutting Through Rocks",
         "Mr. Nobody Against Putin"
     ],
-    "International Feature Film": [
+    "International Feature": [
         "The Secret Agent (Brazil)",
         "It Was Just an Accident (France)",
         "Sentimental Value (Norway)",
@@ -157,14 +157,14 @@ const FALLBACK_NOMINEES = {
         "Sentimental Value",
         "Sinners"
     ],
-    "Original Song": [
+    "Music (Original Song)": [
         "\"Golden\" from KPop Demon Hunters",
         "\"Train Dreams\" from Train Dreams",
         "\"Dear Me\" from Diane Warren: Relentless",
         "\"I Lied To You\" from Sinners",
         "\"Sweet Dreams Of Joy\" from Viva Verdi!"
     ],
-    "Original Score": [
+    "Music (Original Score)": [
         "Sinners",
         "One Battle After Another",
         "Hamnet",
@@ -178,7 +178,7 @@ const FALLBACK_NOMINEES = {
         "The Lost Bus",
         "Sinners"
     ],
-    "Makeup & Hairstyling": [
+    "Makeup & Hair Styling": [
         "Frankenstein",
         "Kokuho",
         "Sinners",
@@ -220,31 +220,10 @@ function getEmojiForNominee(nominee, nomineeEmojis = {}) {
     return "🎬";
 }
 
-// Mapping from Categories/Nominees table names to Submissions table field names
-// The Categories table uses official Oscar names, but the Submissions form uses friendlier names
-const CATEGORY_TO_SUBMISSION_FIELD = {
-    "Picture": "Best Picture",
-    "Directing": "Best Director",
-    "Actor in a Leading Role": "Best Actor",
-    "Actress in a Leading Role": "Best Actress",
-    "Actor in a Supporting Role": "Best Supporting Actor",
-    "Actress in a Supporting Role": "Best Supporting Actress",
-    "Adapted Screenplay": "Writing (Adapted Screenplay)",
-    "Original Screenplay": "Writing (Original Screenplay)",
-    "Animated Feature Film": "Animated Feature",
-    "Documentary Feature Film": "Documentary",
-    "International Feature Film": "International Feature",
-    "Original Song": "Music (Original Song)",
-    "Original Score": "Music (Original Score)",
-    "Makeup & Hairstyling": "Makeup & Hair Styling",
-    // These match exactly and don't need mapping:
-    // "Casting", "Sound", "Cinematography", "Film Editing",
-    // "Visual Effects", "Production Design", "Costume Design"
-};
-
 // Helper to get the Submissions field name for a category
+// Now all tables use the same naming convention
 function getSubmissionFieldName(categoryName) {
-    return CATEGORY_TO_SUBMISSION_FIELD[categoryName] || categoryName;
+    return categoryName;
 }
 
 // Helper to strip emoji prefix from a pick value (e.g., "😈 Sinners" -> "Sinners")
@@ -257,26 +236,26 @@ function stripEmojiPrefix(value) {
 // Fallback category order (used if Presentation Order not in Airtable)
 const FALLBACK_CATEGORY_ORDER = [
     "Casting",
-    "Documentary Feature Film",
-    "Animated Feature Film",
-    "International Feature Film",
-    "Original Song",
-    "Original Score",
+    "Documentary",
+    "Animated Feature",
+    "International Feature",
+    "Music (Original Song)",
+    "Music (Original Score)",
     "Sound",
     "Visual Effects",
-    "Makeup & Hairstyling",
+    "Makeup & Hair Styling",
     "Costume Design",
     "Production Design",
     "Cinematography",
     "Film Editing",
-    "Adapted Screenplay",
-    "Original Screenplay",
-    "Actor in a Supporting Role",
-    "Actress in a Supporting Role",
-    "Directing",
-    "Actor in a Leading Role",
-    "Actress in a Leading Role",
-    "Picture"
+    "Writing (Adapted Screenplay)",
+    "Writing (Original Screenplay)",
+    "Best Supporting Actor",
+    "Best Supporting Actress",
+    "Best Director",
+    "Best Actor",
+    "Best Actress",
+    "Best Picture"
 ];
 
 class OscarRaffle {
