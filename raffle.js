@@ -1418,13 +1418,14 @@ class OscarRaffle {
         const allCompleted = this.categoryOrder.every(cat => this.completedCategories[cat]);
         if (!allCompleted) return;
 
-        // Launch the finale overlay
         const overlay = document.getElementById('finale-overlay');
         const canvas = document.getElementById('finale-canvas');
         const statusEl = document.getElementById('finale-status');
         const winnersEl = document.getElementById('finale-winners');
+        const scrollContent = document.getElementById('finale-scroll-content');
+        const closeBtn = document.getElementById('finale-close');
 
-        // Populate winners list
+        // Populate winners
         winnersEl.innerHTML = this.categoryOrder.map(cat => {
             const completed = this.completedCategories[cat];
             return `<div class="finale-winner-row">
@@ -1433,12 +1434,26 @@ class OscarRaffle {
             </div>`;
         }).join('');
 
-        // Show overlay with fade-in
+        // Show overlay
         overlay.classList.remove('hidden');
         requestAnimationFrame(() => overlay.classList.add('visible'));
 
-        // Start particle system
+        // Start particles
         this.startFinaleParticles(canvas);
+
+        // Start credits scroll after a brief pause
+        this.startCreditsScroll(scrollContent);
+
+        // Close button
+        closeBtn.onclick = () => {
+            if (this._finaleAnimId) cancelAnimationFrame(this._finaleAnimId);
+            if (this._creditsAnimId) cancelAnimationFrame(this._creditsAnimId);
+            overlay.classList.remove('visible');
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                scrollContent.style.top = '100%';
+            }, 800);
+        };
 
         // Save to Airtable in background
         statusEl.textContent = 'Saving winners to Airtable...';
@@ -1484,67 +1499,86 @@ class OscarRaffle {
         }
     }
 
+    startCreditsScroll(scrollContent) {
+        // Wait for layout then measure
+        requestAnimationFrame(() => {
+            const contentHeight = scrollContent.scrollHeight;
+            const viewHeight = window.innerHeight;
+            // Total distance: start from bottom of screen, scroll until closing section is centered
+            const totalDistance = contentHeight + viewHeight * 0.3;
+            const SCROLL_SPEED = 0.55; // pixels per frame (~33px/sec at 60fps)
+            let scrollPos = 0;
+            let startTime = null;
+            const DELAY = 1500; // ms before scroll begins
+
+            const scroll = (timestamp) => {
+                if (!startTime) startTime = timestamp;
+                const elapsed = timestamp - startTime;
+
+                if (elapsed > DELAY) {
+                    scrollPos += SCROLL_SPEED;
+                }
+
+                scrollContent.style.top = `calc(100% - ${scrollPos}px)`;
+
+                if (scrollPos < totalDistance) {
+                    this._creditsAnimId = requestAnimationFrame(scroll);
+                }
+            };
+
+            this._creditsAnimId = requestAnimationFrame(scroll);
+        });
+    }
+
     startFinaleParticles(canvas) {
         const ctx = canvas.getContext('2d');
         let w = canvas.width = window.innerWidth;
         let h = canvas.height = window.innerHeight;
 
-        window.addEventListener('resize', () => {
-            w = canvas.width = window.innerWidth;
-            h = canvas.height = window.innerHeight;
-        });
+        const onResize = () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; };
+        window.addEventListener('resize', onResize);
 
         const particles = [];
-        const GOLD_PALETTE = [
-            '#D4AF37', '#F4E4B5', '#B8960C', '#FFD700',
-            '#C5A028', '#E8C84A', '#A67C00', '#FFF1B5'
-        ];
+        const GOLD_PALETTE = ['#D4AF37', '#F4E4B5', '#B8960C', '#FFD700', '#C5A028', '#E8C84A', '#A67C00', '#FFF1B5'];
 
         class Particle {
             constructor() { this.reset(true); }
-
             reset(initial = false) {
                 this.x = Math.random() * w;
                 this.y = initial ? Math.random() * h : -20;
-                this.size = Math.random() * 4 + 1;
-                this.speedY = Math.random() * 1.5 + 0.3;
-                this.speedX = (Math.random() - 0.5) * 0.8;
+                this.size = Math.random() * 3.5 + 0.8;
+                this.speedY = Math.random() * 1.2 + 0.2;
+                this.speedX = (Math.random() - 0.5) * 0.6;
                 this.color = GOLD_PALETTE[Math.floor(Math.random() * GOLD_PALETTE.length)];
-                this.opacity = Math.random() * 0.7 + 0.3;
+                this.opacity = Math.random() * 0.5 + 0.15;
                 this.wobble = Math.random() * Math.PI * 2;
-                this.wobbleSpeed = Math.random() * 0.03 + 0.01;
+                this.wobbleSpeed = Math.random() * 0.02 + 0.005;
                 this.rotation = Math.random() * Math.PI * 2;
-                this.rotationSpeed = (Math.random() - 0.5) * 0.05;
-                // Some are confetti rectangles, some are circles
-                this.isConfetti = Math.random() > 0.4;
-                this.confettiW = Math.random() * 6 + 3;
-                this.confettiH = Math.random() * 3 + 1;
-                // Sparkle pulse
+                this.rotationSpeed = (Math.random() - 0.5) * 0.04;
+                this.isConfetti = Math.random() > 0.5;
+                this.confettiW = Math.random() * 5 + 2;
+                this.confettiH = Math.random() * 2.5 + 1;
                 this.pulsePhase = Math.random() * Math.PI * 2;
-                this.pulseSpeed = Math.random() * 0.05 + 0.02;
+                this.pulseSpeed = Math.random() * 0.04 + 0.015;
             }
-
             update() {
                 this.wobble += this.wobbleSpeed;
                 this.rotation += this.rotationSpeed;
                 this.pulsePhase += this.pulseSpeed;
-                this.x += this.speedX + Math.sin(this.wobble) * 0.5;
+                this.x += this.speedX + Math.sin(this.wobble) * 0.4;
                 this.y += this.speedY;
                 if (this.y > h + 20) this.reset();
             }
-
             draw() {
                 const pulse = this.isConfetti ? 1 : 0.6 + Math.sin(this.pulsePhase) * 0.4;
                 ctx.save();
                 ctx.globalAlpha = this.opacity * pulse;
                 ctx.translate(this.x, this.y);
                 ctx.rotate(this.rotation);
-
                 if (this.isConfetti) {
                     ctx.fillStyle = this.color;
                     ctx.fillRect(-this.confettiW / 2, -this.confettiH / 2, this.confettiW, this.confettiH);
                 } else {
-                    // Glowing circle sparkle
                     const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size * 2);
                     glow.addColorStop(0, this.color);
                     glow.addColorStop(0.4, this.color);
@@ -1554,34 +1588,17 @@ class OscarRaffle {
                     ctx.arc(0, 0, this.size * 2, 0, Math.PI * 2);
                     ctx.fill();
                 }
-
                 ctx.restore();
             }
         }
 
-        // Create initial particles
-        for (let i = 0; i < 150; i++) {
-            particles.push(new Particle());
-        }
+        for (let i = 0; i < 120; i++) particles.push(new Particle());
 
         const animate = () => {
             ctx.clearRect(0, 0, w, h);
-
-            // Subtle radial vignette
-            const vignette = ctx.createRadialGradient(w/2, h/2, h * 0.2, w/2, h/2, h * 0.9);
-            vignette.addColorStop(0, 'transparent');
-            vignette.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
-            ctx.fillStyle = vignette;
-            ctx.fillRect(0, 0, w, h);
-
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
-
+            particles.forEach(p => { p.update(); p.draw(); });
             this._finaleAnimId = requestAnimationFrame(animate);
         };
-
         animate();
     }
 
