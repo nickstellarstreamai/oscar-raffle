@@ -1389,22 +1389,17 @@ body {
 }
 
 /*
- * Scroll track — the proven Star Wars approach:
- * perspective on the PARENT, rotateX on the CHILD with
- * transform-origin at bottom center (50% 100%).
- * Text appears large at bottom, recedes/shrinks toward top.
+ * Star Wars crawl: perspective on the track, tilt on a
+ * viewport-height wrapper whose origin is at the VIEWPORT
+ * bottom — so every line of text gets the same size
+ * at the same screen position regardless of scroll offset.
  */
 .finale-scroll-track {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 100%;
+    inset: 0;
     z-index: 1;
     perspective: 400px;
     overflow: hidden;
-    display: flex;
-    justify-content: center;
 }
 
 /* Top fade — black gradient sells the vanishing point */
@@ -1420,16 +1415,30 @@ body {
     pointer-events: none;
 }
 
-/* The crawling content — transform-origin bottom, rotated to lean "away" */
-.finale-scroll-content {
+/* Fixed viewport-height wrapper that carries the 3D tilt.
+   Origin at bottom center = text is large at bottom, small at top.
+   Because this element is exactly viewport-height, the perspective
+   scaling is always consistent at any given screen Y position. */
+.finale-crawl-tilt {
     position: absolute;
-    top: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%) rotateX(20deg);
+    transform-origin: 50% 100%;
     width: 900px;
     max-width: 92vw;
+    height: 100%;
+    overflow: visible;
+}
+
+/* The scrolling content lives inside the tilt wrapper.
+   JS moves this via `top`. Positioned at the bottom initially. */
+.finale-scroll-content {
+    position: absolute;
+    left: 0;
+    right: 0;
     text-align: center;
-    transform-origin: 50% 100%;
-    transform: rotateX(20deg);
-    /* JS controls `top` to scroll. Starts at 100% (off-screen below) */
+    /* JS sets top dynamically */
 }
 
 /* Intro section */
