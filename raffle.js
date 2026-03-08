@@ -1069,6 +1069,7 @@ class OscarRaffle {
         this.updateCategoryInAirtable(categoryName, oscarWinner, winner.guestName);
 
         this.renderSidebar();
+        this.updateNavButtons();
         // Pass true to freeze the display state so it doesn't re-calculate after adding winner
         this.showEligibleGuests(true);
     }
