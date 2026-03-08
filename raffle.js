@@ -1418,42 +1418,50 @@ class OscarRaffle {
         const allCompleted = this.categoryOrder.every(cat => this.completedCategories[cat]);
         if (!allCompleted) return;
 
-        if (!confirm('All categories complete! Save all raffle winners to Airtable?')) return;
+        // Launch the finale overlay
+        const overlay = document.getElementById('finale-overlay');
+        const canvas = document.getElementById('finale-canvas');
+        const statusEl = document.getElementById('finale-status');
+        const winnersEl = document.getElementById('finale-winners');
 
-        this.showRefreshStatus('Saving winners to Airtable...', 'pending');
+        // Populate winners list
+        winnersEl.innerHTML = this.categoryOrder.map(cat => {
+            const completed = this.completedCategories[cat];
+            return `<div class="finale-winner-row">
+                <span class="finale-winner-category">${cat}</span>
+                <span class="finale-winner-name">${completed ? completed.raffleWinner : '—'}</span>
+            </div>`;
+        }).join('');
 
+        // Show overlay with fade-in
+        overlay.classList.remove('hidden');
+        requestAnimationFrame(() => overlay.classList.add('visible'));
+
+        // Start particle system
+        this.startFinaleParticles(canvas);
+
+        // Save to Airtable in background
+        statusEl.textContent = 'Saving winners to Airtable...';
         try {
-            // Build updates: match each completed category to its Winners table record
-            // All tables now use official Oscar category names (e.g., "Best Picture")
             const updates = [];
-
             for (const categoryName of this.categoryOrder) {
                 const completed = this.completedCategories[categoryName];
                 if (!completed) continue;
-
-                // Map from Categories table name to Submissions field name (which is what Winners table uses)
                 const submissionFieldName = getSubmissionFieldName(categoryName);
-
-                // Find the matching Winners table record
                 const winnersRecord = this.winnersTableRecords.find(
                     r => r.categoryName === submissionFieldName
                 );
-
                 if (winnersRecord) {
                     updates.push({
                         id: winnersRecord.id,
                         fields: { 'Winner': completed.raffleWinner }
                     });
-                } else {
-                    console.warn(`[WRAP] No Winners table record found for: ${categoryName} (looked for "${submissionFieldName}")`);
                 }
             }
 
-            // Batch update Winners table (max 10 per request)
             for (let i = 0; i < updates.length; i += 10) {
                 const batch = updates.slice(i, i + 10);
                 const url = `https://api.airtable.com/v0/${CONFIG.AIRTABLE_BASE_ID}/${encodeURIComponent(CONFIG.TABLES.WINNERS)}`;
-
                 const response = await fetch(url, {
                     method: 'PATCH',
                     headers: {
@@ -1462,22 +1470,119 @@ class OscarRaffle {
                     },
                     body: JSON.stringify({ records: batch })
                 });
-
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
                     throw new Error(errorData.error?.message || response.statusText);
                 }
-
-                const result = await response.json();
-                console.log(`[WRAP] Updated batch ${Math.floor(i/10) + 1}:`, result.records.map(r => r.fields['Category Name']));
             }
 
-            console.log(`[WRAP] All ${updates.length} winners saved to Airtable!`);
-            this.showRefreshStatus(`All ${updates.length} raffle winners saved to Airtable!`, 'success');
+            statusEl.textContent = `All ${updates.length} winners saved ✓`;
+            statusEl.classList.add('saved');
         } catch (error) {
             console.error('[WRAP] Failed to save winners:', error);
-            this.showRefreshStatus('Failed to save winners: ' + error.message, 'error');
+            statusEl.textContent = 'Could not save to Airtable — winners are stored locally';
         }
+    }
+
+    startFinaleParticles(canvas) {
+        const ctx = canvas.getContext('2d');
+        let w = canvas.width = window.innerWidth;
+        let h = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        });
+
+        const particles = [];
+        const GOLD_PALETTE = [
+            '#D4AF37', '#F4E4B5', '#B8960C', '#FFD700',
+            '#C5A028', '#E8C84A', '#A67C00', '#FFF1B5'
+        ];
+
+        class Particle {
+            constructor() { this.reset(true); }
+
+            reset(initial = false) {
+                this.x = Math.random() * w;
+                this.y = initial ? Math.random() * h : -20;
+                this.size = Math.random() * 4 + 1;
+                this.speedY = Math.random() * 1.5 + 0.3;
+                this.speedX = (Math.random() - 0.5) * 0.8;
+                this.color = GOLD_PALETTE[Math.floor(Math.random() * GOLD_PALETTE.length)];
+                this.opacity = Math.random() * 0.7 + 0.3;
+                this.wobble = Math.random() * Math.PI * 2;
+                this.wobbleSpeed = Math.random() * 0.03 + 0.01;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotationSpeed = (Math.random() - 0.5) * 0.05;
+                // Some are confetti rectangles, some are circles
+                this.isConfetti = Math.random() > 0.4;
+                this.confettiW = Math.random() * 6 + 3;
+                this.confettiH = Math.random() * 3 + 1;
+                // Sparkle pulse
+                this.pulsePhase = Math.random() * Math.PI * 2;
+                this.pulseSpeed = Math.random() * 0.05 + 0.02;
+            }
+
+            update() {
+                this.wobble += this.wobbleSpeed;
+                this.rotation += this.rotationSpeed;
+                this.pulsePhase += this.pulseSpeed;
+                this.x += this.speedX + Math.sin(this.wobble) * 0.5;
+                this.y += this.speedY;
+                if (this.y > h + 20) this.reset();
+            }
+
+            draw() {
+                const pulse = this.isConfetti ? 1 : 0.6 + Math.sin(this.pulsePhase) * 0.4;
+                ctx.save();
+                ctx.globalAlpha = this.opacity * pulse;
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+
+                if (this.isConfetti) {
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(-this.confettiW / 2, -this.confettiH / 2, this.confettiW, this.confettiH);
+                } else {
+                    // Glowing circle sparkle
+                    const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size * 2);
+                    glow.addColorStop(0, this.color);
+                    glow.addColorStop(0.4, this.color);
+                    glow.addColorStop(1, 'transparent');
+                    ctx.fillStyle = glow;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, this.size * 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            }
+        }
+
+        // Create initial particles
+        for (let i = 0; i < 150; i++) {
+            particles.push(new Particle());
+        }
+
+        const animate = () => {
+            ctx.clearRect(0, 0, w, h);
+
+            // Subtle radial vignette
+            const vignette = ctx.createRadialGradient(w/2, h/2, h * 0.2, w/2, h/2, h * 0.9);
+            vignette.addColorStop(0, 'transparent');
+            vignette.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
+            ctx.fillStyle = vignette;
+            ctx.fillRect(0, 0, w, h);
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            this._finaleAnimId = requestAnimationFrame(animate);
+        };
+
+        animate();
     }
 
     async refreshData() {
