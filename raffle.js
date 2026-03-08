@@ -369,21 +369,30 @@ class OscarRaffle {
     // ============================================
 
     async fetchTable(tableName) {
-        const url = `https://api.airtable.com/v0/${CONFIG.AIRTABLE_BASE_ID}/${encodeURIComponent(tableName)}`;
+        let allRecords = [];
+        let offset = null;
 
-        const response = await fetch(url, {
-            headers: {
-                'Authorization': `Bearer ${CONFIG.AIRTABLE_API_KEY}`
+        do {
+            let url = `https://api.airtable.com/v0/${CONFIG.AIRTABLE_BASE_ID}/${encodeURIComponent(tableName)}`;
+            if (offset) url += `?offset=${encodeURIComponent(offset)}`;
+
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `Bearer ${CONFIG.AIRTABLE_API_KEY}`
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(`Airtable error: ${errorData.error?.message || response.statusText}`);
             }
-        });
 
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({}));
-            throw new Error(`Airtable error: ${errorData.error?.message || response.statusText}`);
-        }
+            const data = await response.json();
+            allRecords = allRecords.concat(data.records);
+            offset = data.offset || null;
+        } while (offset);
 
-        const data = await response.json();
-        return data.records;
+        return allRecords;
     }
 
     async updateCategoryInAirtable(categoryName, oscarWinner, raffleWinner) {
