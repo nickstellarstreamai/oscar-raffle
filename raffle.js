@@ -59,35 +59,35 @@ const FALLBACK_NOMINEES = {
         "Sinners",
         "Train Dreams"
     ],
-    "Best Director": [
+    "Directing": [
         "Ryan Coogler (Sinners)",
         "Paul Thomas Anderson (One Battle After Another)",
         "Chloé Zhao (Hamnet)",
         "Josh Safdie (Marty Supreme)",
         "Joachim Trier (Sentimental Value)"
     ],
-    "Best Actor": [
+    "Actor in a Leading Role": [
         "Michael B. Jordan (Sinners)",
         "Leonardo DiCaprio (One Battle After Another)",
         "Timothée Chalamet (Marty Supreme)",
         "Ethan Hawke (Blue Moon)",
         "Wagner Moura (The Secret Agent)"
     ],
-    "Best Actress": [
+    "Actress in a Leading Role": [
         "Jessie Buckley (Hamnet)",
         "Rose Byrne (If I Had Legs I'd Kick You)",
         "Renate Reinsve (Sentimental Value)",
         "Emma Stone (Bugonia)",
         "Kate Hudson (Song Sung Blue)"
     ],
-    "Best Supporting Actress": [
+    "Actress in a Supporting Role": [
         "Elle Fanning (Sentimental Value)",
         "Wunmi Mosaku (Sinners)",
         "Teyana Taylor (One Battle After Another)",
         "Inga Ibsdotter Lilleaas (Sentimental Value)",
         "Amy Madigan (Weapons)"
     ],
-    "Best Supporting Actor": [
+    "Actor in a Supporting Role": [
         "Benicio del Toro (One Battle After Another)",
         "Jacob Elordi (Frankenstein)",
         "Sean Penn (One Battle After Another)",
@@ -115,21 +115,21 @@ const FALLBACK_NOMINEES = {
         "The Secret Agent",
         "Sinners"
     ],
-    "Animated Feature": [
+    "Animated Feature Film": [
         "Arco",
         "Elio",
         "KPop Demon Hunters",
         "Little Amélie or the Character of Rain",
         "Zootopia 2"
     ],
-    "Documentary": [
+    "Documentary Feature Film": [
         "The Perfect Neighbor",
         "The Alabama Solution",
         "Come See Me in the Good Light",
         "Cutting Through Rocks",
         "Mr. Nobody Against Putin"
     ],
-    "International Feature": [
+    "International Feature Film": [
         "The Secret Agent (Brazil)",
         "It Was Just an Accident (France)",
         "Sentimental Value (Norway)",
@@ -178,7 +178,7 @@ const FALLBACK_NOMINEES = {
         "The Lost Bus",
         "Sinners"
     ],
-    "Makeup & Hair Styling": [
+    "Makeup and Hairstyling": [
         "Frankenstein",
         "Kokuho",
         "Sinners",
@@ -221,7 +221,7 @@ function getEmojiForNominee(nominee, nomineeEmojis = {}) {
 }
 
 // Helper to get the Submissions field name for a category
-// Now all tables use the same naming convention
+// All tables use official Oscar category names
 function getSubmissionFieldName(categoryName) {
     return categoryName;
 }
@@ -236,25 +236,25 @@ function stripEmojiPrefix(value) {
 // Fallback category order (used if Presentation Order not in Airtable)
 const FALLBACK_CATEGORY_ORDER = [
     "Casting",
-    "Documentary",
-    "Animated Feature",
-    "International Feature",
+    "Documentary Feature Film",
+    "Animated Feature Film",
+    "International Feature Film",
     "Music (Original Song)",
     "Music (Original Score)",
     "Sound",
     "Visual Effects",
-    "Makeup & Hair Styling",
+    "Makeup and Hairstyling",
     "Costume Design",
     "Production Design",
     "Cinematography",
     "Film Editing",
     "Writing (Adapted Screenplay)",
     "Writing (Original Screenplay)",
-    "Best Supporting Actor",
-    "Best Supporting Actress",
-    "Best Director",
-    "Best Actor",
-    "Best Actress",
+    "Actor in a Supporting Role",
+    "Actress in a Supporting Role",
+    "Directing",
+    "Actor in a Leading Role",
+    "Actress in a Leading Role",
     "Best Picture"
 ];
 
@@ -739,7 +739,7 @@ class OscarRaffle {
     showEligibleGuests(freezeAfterSpin = false) {
         const categoryName = this.currentCategory.name;
         const oscarWinner = this.currentOscarWinner;
-        const isBestPicture = categoryName.toLowerCase() === 'picture';
+        const isBestPicture = categoryName === 'Best Picture';
         const completed = this.completedCategories[categoryName];
 
         // Get excluded names (winners who are still checked/excluded)
@@ -904,7 +904,7 @@ class OscarRaffle {
 
         const categoryName = this.currentCategory.name;
         const oscarWinner = this.currentOscarWinner;
-        const isBestPicture = categoryName.toLowerCase() === 'picture';
+        const isBestPicture = categoryName === 'Best Picture';
 
         // Get excluded names
         const excludedNames = new Set(
@@ -1400,7 +1400,7 @@ class OscarRaffle {
 
         try {
             // Build updates: match each completed category to its Winners table record
-            // Winners table uses Submissions-style field names (e.g., "Best Picture")
+            // All tables now use official Oscar category names (e.g., "Best Picture")
             const updates = [];
 
             for (const categoryName of this.categoryOrder) {
