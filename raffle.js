@@ -794,27 +794,40 @@ class OscarRaffle {
         let guestsToShow;
         let eligibleForRaffle;
 
+        const msgText = this.elements.noGuessesMessage.querySelector('.no-guesses-text');
+        const guessersContainer = this.elements.noGuessesMessage.querySelector('.correct-guessers-names');
+
         if (correctGuests.length === 0) {
             // Nobody guessed correctly
             guestsToShow = this.submissions;
             eligibleForRaffle = guestsToShow.filter(g =>
                 isBestPicture || !excludedNames.has(g.guestName)
             );
-            this.elements.noGuessesMessage.textContent = 'Nobody guessed correctly! Everyone is in the running!';
-            this.elements.noGuessesMessage.classList.remove('hidden');
+            msgText.textContent = 'Nobody guessed correctly! Everyone is in the running!';
+            guessersContainer.classList.add('hidden');
+            guessersContainer.innerHTML = '';
+            this.elements.noGuessesMessage.classList.remove('hidden', 'all-won');
         } else if (eligibleCorrectGuests.length === 0 && !freezeAfterSpin) {
             // All correct guessers have already won - open to everyone
             guestsToShow = this.submissions;
             eligibleForRaffle = guestsToShow.filter(g =>
                 isBestPicture || !excludedNames.has(g.guestName)
             );
-            this.elements.noGuessesMessage.textContent = `All ${correctGuests.length} correct guesser(s) already won! Opening to everyone.`;
+            msgText.textContent = `All ${correctGuests.length} correct guesser${correctGuests.length === 1 ? '' : 's'} already won — opening to everyone!`;
+            guessersContainer.innerHTML = correctGuests.map(g =>
+                `<span class="guesser-tag">${g.guestName}</span>`
+            ).join('');
+            guessersContainer.classList.remove('hidden');
             this.elements.noGuessesMessage.classList.remove('hidden');
+            this.elements.noGuessesMessage.classList.add('all-won');
         } else {
             // Normal case: show correct guessers
             guestsToShow = correctGuests;
             eligibleForRaffle = eligibleCorrectGuests;
+            guessersContainer.classList.add('hidden');
+            guessersContainer.innerHTML = '';
             this.elements.noGuessesMessage.classList.add('hidden');
+            this.elements.noGuessesMessage.classList.remove('all-won');
         }
 
         // Show eligible count (people who can actually win)
