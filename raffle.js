@@ -1501,20 +1501,25 @@ class OscarRaffle {
     }
 
     startCreditsScroll(scrollContent) {
-        // Set initial position off-screen below
         const viewHeight = window.innerHeight;
         scrollContent.style.top = viewHeight + 'px';
 
         requestAnimationFrame(() => {
             const contentHeight = scrollContent.scrollHeight;
-            // Scroll from viewHeight (below screen) to negative contentHeight (fully past top)
-            const totalDistance = contentHeight + viewHeight;
+            // Stop position: closing section centered in viewport
+            // The closing section is at the bottom of the content.
+            // We need its offset from the top of scrollContent.
+            const closingEl = scrollContent.querySelector('.finale-closing');
+            const closingOffset = closingEl ? closingEl.offsetTop : contentHeight - 200;
+            const closingHeight = closingEl ? closingEl.offsetHeight : 400;
+            // Stop when the closing section's center aligns with ~45% from top of viewport
+            const stopTop = -(closingOffset - viewHeight * 0.45 + closingHeight * 0.3);
+
             const BASE_SPEED = 0.7;
-            let currentTop = viewHeight; // start below viewport
+            let currentTop = viewHeight;
             let startTime = null;
             const DELAY = 1500;
 
-            // Mouse position tracking for scroll speed control
             let mouseY = viewHeight / 2;
             const overlay = document.getElementById('finale-overlay');
             const onMouseMove = (e) => { mouseY = e.clientY; };
@@ -1537,12 +1542,14 @@ class OscarRaffle {
                         speed = BASE_SPEED;
                     }
                     currentTop = Math.min(viewHeight, currentTop - speed);
+                    // Clamp: don't scroll past the stop point
+                    currentTop = Math.max(stopTop, currentTop);
                 }
 
                 scrollContent.style.top = currentTop + 'px';
 
-                // Stop when the closing section is roughly centered
-                if (currentTop > -contentHeight) {
+                // Keep animating until we reach the stop (for mouse rewind to work)
+                if (currentTop > stopTop) {
                     this._creditsAnimId = requestAnimationFrame(scroll);
                 }
             };
@@ -1558,66 +1565,60 @@ class OscarRaffle {
 
         const onResize = () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; };
         window.addEventListener('resize', onResize);
+        this._finaleCleanups = this._finaleCleanups || [];
+        this._finaleCleanups.push(() => window.removeEventListener('resize', onResize));
 
-        const particles = [];
-        const GOLD_PALETTE = ['#D4AF37', '#F4E4B5', '#B8960C', '#FFD700', '#C5A028', '#E8C84A', '#A67C00', '#FFF1B5'];
+        // Twinkling starfield
+        const stars = [];
+        const STAR_COUNT = 200;
 
-        class Particle {
-            constructor() { this.reset(true); }
-            reset(initial = false) {
-                this.x = Math.random() * w;
-                this.y = initial ? Math.random() * h : -20;
-                this.size = Math.random() * 3.5 + 0.8;
-                this.speedY = Math.random() * 1.2 + 0.2;
-                this.speedX = (Math.random() - 0.5) * 0.6;
-                this.color = GOLD_PALETTE[Math.floor(Math.random() * GOLD_PALETTE.length)];
-                this.opacity = Math.random() * 0.5 + 0.15;
-                this.wobble = Math.random() * Math.PI * 2;
-                this.wobbleSpeed = Math.random() * 0.02 + 0.005;
-                this.rotation = Math.random() * Math.PI * 2;
-                this.rotationSpeed = (Math.random() - 0.5) * 0.04;
-                this.isConfetti = Math.random() > 0.5;
-                this.confettiW = Math.random() * 5 + 2;
-                this.confettiH = Math.random() * 2.5 + 1;
-                this.pulsePhase = Math.random() * Math.PI * 2;
-                this.pulseSpeed = Math.random() * 0.04 + 0.015;
-            }
-            update() {
-                this.wobble += this.wobbleSpeed;
-                this.rotation += this.rotationSpeed;
-                this.pulsePhase += this.pulseSpeed;
-                this.x += this.speedX + Math.sin(this.wobble) * 0.4;
-                this.y += this.speedY;
-                if (this.y > h + 20) this.reset();
-            }
-            draw() {
-                const pulse = this.isConfetti ? 1 : 0.6 + Math.sin(this.pulsePhase) * 0.4;
-                ctx.save();
-                ctx.globalAlpha = this.opacity * pulse;
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.rotation);
-                if (this.isConfetti) {
-                    ctx.fillStyle = this.color;
-                    ctx.fillRect(-this.confettiW / 2, -this.confettiH / 2, this.confettiW, this.confettiH);
-                } else {
-                    const glow = ctx.createRadialGradient(0, 0, 0, 0, 0, this.size * 2);
-                    glow.addColorStop(0, this.color);
-                    glow.addColorStop(0.4, this.color);
-                    glow.addColorStop(1, 'transparent');
-                    ctx.fillStyle = glow;
-                    ctx.beginPath();
-                    ctx.arc(0, 0, this.size * 2, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                ctx.restore();
-            }
+        for (let i = 0; i < STAR_COUNT; i++) {
+            stars.push({
+                x: Math.random() * w,
+                y: Math.random() * h,
+                size: Math.random() * 1.8 + 0.3,
+                baseOpacity: Math.random() * 0.6 + 0.2,
+                phase: Math.random() * Math.PI * 2,
+                // Each star twinkles at its own speed
+                speed: Math.random() * 0.03 + 0.008,
+                // A few stars are slightly warm/gold tinted
+                warm: Math.random() > 0.8
+            });
         }
-
-        for (let i = 0; i < 120; i++) particles.push(new Particle());
 
         const animate = () => {
             ctx.clearRect(0, 0, w, h);
-            particles.forEach(p => { p.update(); p.draw(); });
+
+            for (const star of stars) {
+                star.phase += star.speed;
+                // Smooth twinkle: oscillate between dim and bright
+                const twinkle = 0.4 + Math.sin(star.phase) * 0.6;
+                const opacity = star.baseOpacity * Math.max(0.05, twinkle);
+
+                ctx.save();
+                ctx.globalAlpha = opacity;
+
+                if (star.warm) {
+                    // Warm gold-white star with subtle glow
+                    const glow = ctx.createRadialGradient(star.x, star.y, 0, star.x, star.y, star.size * 3);
+                    glow.addColorStop(0, '#FFF8E7');
+                    glow.addColorStop(0.3, '#F4E4B5');
+                    glow.addColorStop(1, 'transparent');
+                    ctx.fillStyle = glow;
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.size * 3, 0, Math.PI * 2);
+                    ctx.fill();
+                } else {
+                    // Cool white pinpoint star
+                    ctx.fillStyle = '#fff';
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+
+                ctx.restore();
+            }
+
             this._finaleAnimId = requestAnimationFrame(animate);
         };
         animate();
