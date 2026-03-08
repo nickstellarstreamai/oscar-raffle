@@ -10,86 +10,89 @@ const DEFAULT_EMOJIS = {
     "Hamnet": "🎭",
     "Frankenstein": "🧟",
     "Marty Supreme": "🏓",
-    "Wicked: For Good": "🧙‍♀️",
     "Sentimental Value": "💝",
     "Train Dreams": "🚂",
     "Avatar: Fire and Ash": "🔥",
     "The Secret Agent": "🕵️",
-    "Elio": "👽",
-    "The Day the Earth Blew Up: A Looney Tunes Movie": "🐰",
-    "Mufasa: The Lion King": "🦁",
-    "Dog Man": "🐕",
-    "How to Train Your Dragon": "🐉",
-    "Salme": "🎬",
-    "The Cats of Malta": "🐱",
-    "Super/Man: The Christopher Reeve Story": "🦸",
-    "Porcelain War": "🏺",
-    "Soundtrack to a Coup d'Etat": "🎵",
-    "Emilia Pérez (France)": "🇫🇷",
-    "I'm Still Here (Brazil)": "🇧🇷",
-    "Flow (Latvia)": "🇱🇻",
-    "Sentimental Value (Norway)": "🇳🇴",
-    "The Secret Agent (South Korea)": "🇰🇷",
-    "F1": "🏎️",
-    "Sirāt": "🌍",
-    "Better Man": "🎤",
-    "Blue Moon": "🌙",
     "Bugonia": "🦟",
-    "The Outrun": "🏃‍♀️",
-    "The Drama": "💔",
+    "F1": "🏎️",
+    "Elio": "👽",
+    "Arco": "🌈",
+    "KPop Demon Hunters": "👹",
+    "Little Amélie or the Character of Rain": "🌧️",
+    "Zootopia 2": "🐾",
+    "The Perfect Neighbor": "🏠",
+    "The Alabama Solution": "📜",
+    "Come See Me in the Good Light": "💡",
+    "Cutting Through Rocks": "🪨",
+    "Mr. Nobody Against Putin": "✊",
+    "The Secret Agent (Brazil)": "🇧🇷",
+    "It Was Just an Accident (France)": "🇫🇷",
+    "Sentimental Value (Norway)": "🇳🇴",
+    "Sirât (Spain)": "🇪🇸",
+    "The Voice of Hind Rajab (Tunisia)": "🇹🇳",
+    "Sirāt": "🌍",
+    "Blue Moon": "🌙",
     "It Was Just an Accident": "💥",
     "Weapons": "🔫",
-    "The Smashing Machine": "💪"
+    "The Smashing Machine": "💪",
+    "Kokuho": "🍚",
+    "The Ugly Stepsister": "👠",
+    "Jurassic World Rebirth": "🦖",
+    "The Lost Bus": "🚌",
+    "Song Sung Blue": "🎵",
+    "Diane Warren: Relentless": "🎹",
+    "Viva Verdi!": "🎶"
 };
 
 // Fallback nominee list (used if Nominees table doesn't exist in Airtable)
 const FALLBACK_NOMINEES = {
     "Picture": [
-        "Sinners",
-        "One Battle After Another",
-        "Hamnet",
+        "Bugonia",
+        "F1",
         "Frankenstein",
+        "Hamnet",
         "Marty Supreme",
-        "Wicked: For Good",
+        "One Battle After Another",
+        "The Secret Agent",
         "Sentimental Value",
-        "Train Dreams",
-        "Avatar: Fire and Ash",
-        "The Secret Agent"
+        "Sinners",
+        "Train Dreams"
     ],
     "Directing": [
         "Ryan Coogler (Sinners)",
         "Paul Thomas Anderson (One Battle After Another)",
         "Chloé Zhao (Hamnet)",
-        "Guillermo del Toro (Frankenstein)",
-        "Josh Safdie (Marty Supreme)"
+        "Josh Safdie (Marty Supreme)",
+        "Joachim Trier (Sentimental Value)"
     ],
     "Actor in a Leading Role": [
         "Michael B. Jordan (Sinners)",
         "Leonardo DiCaprio (One Battle After Another)",
         "Timothée Chalamet (Marty Supreme)",
         "Ethan Hawke (Blue Moon)",
-        "Jesse Plemons (Bugonia)"
+        "Wagner Moura (The Secret Agent)"
     ],
     "Actress in a Leading Role": [
-        "Mikey Madison (Hamnet)",
-        "Zendaya (The Drama)",
-        "Cate Blanchett (The Secret Agent)",
-        "Nicole Kidman (Wicked: For Good)",
-        "Saoirse Ronan (The Outrun)"
+        "Jessie Buckley (Hamnet)",
+        "Rose Byrne (If I Had Legs I'd Kick You)",
+        "Renate Reinsve (Sentimental Value)",
+        "Emma Stone (Bugonia)",
+        "Kate Hudson (Song Sung Blue)"
     ],
     "Actress in a Supporting Role": [
-        "Ariana Grande (Wicked: For Good)",
+        "Elle Fanning (Sentimental Value)",
         "Wunmi Mosaku (Sinners)",
         "Teyana Taylor (One Battle After Another)",
         "Inga Ibsdotter Lilleaas (Sentimental Value)",
         "Amy Madigan (Weapons)"
     ],
     "Actor in a Supporting Role": [
-        "Benicio Del Toro (One Battle After Another)",
+        "Benicio del Toro (One Battle After Another)",
         "Jacob Elordi (Frankenstein)",
-        "Paul Mescal (Hamnet)",
         "Sean Penn (One Battle After Another)",
-        "Stellan Skarsgård (Sentimental Value)"
+        "Stellan Skarsgård (Sentimental Value)",
+        "Delroy Lindo (Sinners)"
     ],
     "Adapted Screenplay": [
         "One Battle After Another",
@@ -103,35 +106,35 @@ const FALLBACK_NOMINEES = {
         "Marty Supreme",
         "Sentimental Value",
         "It Was Just an Accident",
-        "Weapons"
+        "Blue Moon"
     ],
     "Casting": [
-        "Sinners",
-        "One Battle After Another",
         "Hamnet",
-        "Frankenstein",
-        "Marty Supreme"
+        "Marty Supreme",
+        "One Battle After Another",
+        "The Secret Agent",
+        "Sinners"
     ],
     "Animated Feature Film": [
+        "Arco",
         "Elio",
-        "The Day the Earth Blew Up: A Looney Tunes Movie",
-        "Mufasa: The Lion King",
-        "Dog Man",
-        "How to Train Your Dragon"
+        "KPop Demon Hunters",
+        "Little Amélie or the Character of Rain",
+        "Zootopia 2"
     ],
     "Documentary Feature Film": [
-        "Salme",
-        "The Cats of Malta",
-        "Super/Man: The Christopher Reeve Story",
-        "Porcelain War",
-        "Soundtrack to a Coup d'Etat"
+        "The Perfect Neighbor",
+        "The Alabama Solution",
+        "Come See Me in the Good Light",
+        "Cutting Through Rocks",
+        "Mr. Nobody Against Putin"
     ],
-    "International Feature": [
+    "International Feature Film": [
+        "The Secret Agent (Brazil)",
+        "It Was Just an Accident (France)",
         "Sentimental Value (Norway)",
-        "The Secret Agent (South Korea)",
-        "Emilia Pérez (France)",
-        "I'm Still Here (Brazil)",
-        "Flow (Latvia)"
+        "Sirât (Spain)",
+        "The Voice of Hind Rajab (Tunisia)"
     ],
     "Sound": [
         "F1",
@@ -141,60 +144,60 @@ const FALLBACK_NOMINEES = {
         "Sirāt"
     ],
     "Cinematography": [
+        "Frankenstein",
+        "Marty Supreme",
         "One Battle After Another",
         "Sinners",
-        "Hamnet",
-        "Frankenstein",
-        "The Secret Agent"
+        "Train Dreams"
     ],
     "Film Editing": [
-        "Sinners",
-        "One Battle After Another",
-        "Hamnet",
+        "F1",
         "Marty Supreme",
-        "Frankenstein"
+        "One Battle After Another",
+        "Sentimental Value",
+        "Sinners"
     ],
     "Original Song": [
-        "Wicked: For Good",
-        "F1",
-        "Sinners",
-        "Better Man",
-        "Mufasa: The Lion King"
+        "\"Golden\" from KPop Demon Hunters",
+        "\"Train Dreams\" from Train Dreams",
+        "\"Dear Me\" from Diane Warren: Relentless",
+        "\"I Lied To You\" from Sinners",
+        "\"Sweet Dreams Of Joy\" from Viva Verdi!"
     ],
     "Original Score": [
         "Sinners",
         "One Battle After Another",
         "Hamnet",
         "Frankenstein",
-        "Marty Supreme"
+        "Bugonia"
     ],
     "Visual Effects": [
         "Avatar: Fire and Ash",
         "F1",
-        "Frankenstein",
-        "Wicked: For Good",
-        "Sirāt"
+        "Jurassic World Rebirth",
+        "The Lost Bus",
+        "Sinners"
     ],
     "Makeup & Hairstyling": [
         "Frankenstein",
+        "Kokuho",
         "Sinners",
-        "Wicked: For Good",
         "The Smashing Machine",
-        "One Battle After Another"
+        "The Ugly Stepsister"
     ],
     "Production Design": [
         "Frankenstein",
-        "Wicked: For Good",
-        "One Battle After Another",
         "Hamnet",
+        "Marty Supreme",
+        "One Battle After Another",
         "Sinners"
     ],
     "Costume Design": [
-        "Wicked: For Good",
+        "Avatar: Fire and Ash",
         "Frankenstein",
-        "One Battle After Another",
         "Hamnet",
-        "The Secret Agent"
+        "Marty Supreme",
+        "Sinners"
     ]
 };
 
@@ -215,6 +218,40 @@ function getEmojiForNominee(nominee, nomineeEmojis = {}) {
 
     // Default emoji
     return "🎬";
+}
+
+// Mapping from Categories/Nominees table names to Submissions table field names
+// The Categories table uses official Oscar names, but the Submissions form uses friendlier names
+const CATEGORY_TO_SUBMISSION_FIELD = {
+    "Picture": "Best Picture",
+    "Directing": "Best Director",
+    "Actor in a Leading Role": "Best Actor",
+    "Actress in a Leading Role": "Best Actress",
+    "Actor in a Supporting Role": "Best Supporting Actor",
+    "Actress in a Supporting Role": "Best Supporting Actress",
+    "Adapted Screenplay": "Writing (Adapted Screenplay)",
+    "Original Screenplay": "Writing (Original Screenplay)",
+    "Animated Feature Film": "Animated Feature",
+    "Documentary Feature Film": "Documentary",
+    "International Feature Film": "International Feature",
+    "Original Song": "Music (Original Song)",
+    "Original Score": "Music (Original Score)",
+    "Makeup & Hairstyling": "Makeup & Hair Styling",
+    // These match exactly and don't need mapping:
+    // "Casting", "Sound", "Cinematography", "Film Editing",
+    // "Visual Effects", "Production Design", "Costume Design"
+};
+
+// Helper to get the Submissions field name for a category
+function getSubmissionFieldName(categoryName) {
+    return CATEGORY_TO_SUBMISSION_FIELD[categoryName] || categoryName;
+}
+
+// Helper to strip emoji prefix from a pick value (e.g., "😈 Sinners" -> "Sinners")
+function stripEmojiPrefix(value) {
+    if (!value) return value;
+    // Remove leading emoji(s) and space - emojis are typically 1-4 chars followed by optional variation selector + space
+    return value.replace(/^[\p{Emoji}\p{Emoji_Component}\u200d\ufe0f]+\s*/u, '').trim();
 }
 
 // Fallback category order (used if Presentation Order not in Airtable)
@@ -259,6 +296,8 @@ class OscarRaffle {
         this.currentOscarWinner = null;
         // Dynamic category order from Airtable (falls back to FALLBACK_CATEGORY_ORDER)
         this.categoryOrder = [...FALLBACK_CATEGORY_ORDER];
+        // Winners table records from Airtable (for wrap-up)
+        this.winnersTableRecords = [];
 
         // Load persisted state
         this.loadWinnersData();
@@ -513,6 +552,20 @@ class OscarRaffle {
             guestName: record.fields[CONFIG.FIELDS.GUEST_NAME],
             picks: record.fields
         })).filter(s => s.guestName);
+
+        // Load Winners table records (for wrap-up functionality)
+        try {
+            const winnersTableData = await this.fetchTable(CONFIG.TABLES.WINNERS);
+            this.winnersTableRecords = winnersTableData.map(record => ({
+                id: record.id,
+                categoryName: record.fields['Category Name'],
+                winner: record.fields['Winner'] || ''
+            }));
+            console.log('Loaded Winners table:', this.winnersTableRecords.length, 'records');
+        } catch (e) {
+            console.log('Winners table not found, wrap-up will not save to Airtable');
+            this.winnersTableRecords = [];
+        }
     }
 
     // ============================================
@@ -730,8 +783,9 @@ class OscarRaffle {
         }
 
         // Find guests who guessed correctly
+        const submissionField = getSubmissionFieldName(categoryName);
         const correctGuests = this.submissions.filter(sub => {
-            const pick = sub.picks[categoryName];
+            const pick = stripEmojiPrefix(sub.picks[submissionField]);
             return pick && pick.toLowerCase().trim() === oscarWinner.toLowerCase().trim();
         });
 
@@ -805,8 +859,15 @@ class OscarRaffle {
         const isLastCategory = this.currentCategoryIndex >= this.categoryOrder.length - 1;
 
         this.elements.prevCategoryButton.disabled = isFirstCategory;
-        this.elements.nextCategoryButton.textContent = isLastCategory ? '🎬 Wrap!' : 'Next →';
-        this.elements.nextCategoryButton.disabled = isLastCategory;
+
+        if (isLastCategory) {
+            const allCompleted = this.categoryOrder.every(cat => this.completedCategories[cat]);
+            this.elements.nextCategoryButton.textContent = '🎬 Wrap!';
+            this.elements.nextCategoryButton.disabled = !allCompleted;
+        } else {
+            this.elements.nextCategoryButton.textContent = 'Next →';
+            this.elements.nextCategoryButton.disabled = false;
+        }
     }
 
     // ============================================
@@ -822,11 +883,20 @@ class OscarRaffle {
     }
 
     nextCategory() {
-        if (this.currentCategoryIndex < this.categoryOrder.length - 1) {
-            this.currentCategoryIndex++;
-            this.saveCurrentCategoryIndex();
-            this.showCurrentCategory();
+        const isLastCategory = this.currentCategoryIndex >= this.categoryOrder.length - 1;
+
+        if (isLastCategory) {
+            // Wrap! - save all winners to Airtable Winners table
+            const allCompleted = this.categoryOrder.every(cat => this.completedCategories[cat]);
+            if (allCompleted) {
+                this.wrapUp();
+            }
+            return;
         }
+
+        this.currentCategoryIndex++;
+        this.saveCurrentCategoryIndex();
+        this.showCurrentCategory();
     }
 
     // ============================================
@@ -865,8 +935,9 @@ class OscarRaffle {
         );
 
         // Find guests who guessed correctly
+        const submissionField = getSubmissionFieldName(categoryName);
         const correctGuests = this.submissions.filter(sub => {
-            const pick = sub.picks[categoryName];
+            const pick = stripEmojiPrefix(sub.picks[submissionField]);
             return pick && pick.toLowerCase().trim() === oscarWinner.toLowerCase().trim();
         });
 
@@ -1337,6 +1408,72 @@ class OscarRaffle {
             this.showCurrentCategory();
 
             console.log(`[RESET] Category "${categoryName}" has been reset`);
+        }
+    }
+
+    async wrapUp() {
+        const allCompleted = this.categoryOrder.every(cat => this.completedCategories[cat]);
+        if (!allCompleted) return;
+
+        if (!confirm('All categories complete! Save all raffle winners to Airtable?')) return;
+
+        this.showRefreshStatus('Saving winners to Airtable...', 'pending');
+
+        try {
+            // Build updates: match each completed category to its Winners table record
+            // Winners table uses Submissions-style field names (e.g., "Best Picture")
+            const updates = [];
+
+            for (const categoryName of this.categoryOrder) {
+                const completed = this.completedCategories[categoryName];
+                if (!completed) continue;
+
+                // Map from Categories table name to Submissions field name (which is what Winners table uses)
+                const submissionFieldName = getSubmissionFieldName(categoryName);
+
+                // Find the matching Winners table record
+                const winnersRecord = this.winnersTableRecords.find(
+                    r => r.categoryName === submissionFieldName
+                );
+
+                if (winnersRecord) {
+                    updates.push({
+                        id: winnersRecord.id,
+                        fields: { 'Winner': completed.raffleWinner }
+                    });
+                } else {
+                    console.warn(`[WRAP] No Winners table record found for: ${categoryName} (looked for "${submissionFieldName}")`);
+                }
+            }
+
+            // Batch update Winners table (max 10 per request)
+            for (let i = 0; i < updates.length; i += 10) {
+                const batch = updates.slice(i, i + 10);
+                const url = `https://api.airtable.com/v0/${CONFIG.AIRTABLE_BASE_ID}/${encodeURIComponent(CONFIG.TABLES.WINNERS)}`;
+
+                const response = await fetch(url, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${CONFIG.AIRTABLE_API_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ records: batch })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error?.message || response.statusText);
+                }
+
+                const result = await response.json();
+                console.log(`[WRAP] Updated batch ${Math.floor(i/10) + 1}:`, result.records.map(r => r.fields['Category Name']));
+            }
+
+            console.log(`[WRAP] All ${updates.length} winners saved to Airtable!`);
+            this.showRefreshStatus(`All ${updates.length} raffle winners saved to Airtable!`, 'success');
+        } catch (error) {
+            console.error('[WRAP] Failed to save winners:', error);
+            this.showRefreshStatus('Failed to save winners: ' + error.message, 'error');
         }
     }
 
