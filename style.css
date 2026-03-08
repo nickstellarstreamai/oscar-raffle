@@ -1388,66 +1388,76 @@ body {
     background: rgba(212, 175, 55, 0.1);
 }
 
-/* Scroll track — perspective container, origin at TOP so text recedes upward */
+/*
+ * Scroll track — the proven Star Wars approach:
+ * perspective on the PARENT, rotateX on the CHILD with
+ * transform-origin at bottom center (50% 100%).
+ * Text appears large at bottom, recedes/shrinks toward top.
+ */
 .finale-scroll-track {
     position: absolute;
-    inset: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
     z-index: 1;
-    perspective: 300px;
+    perspective: 400px;
     overflow: hidden;
-    -webkit-mask-image: linear-gradient(
-        to bottom,
-        transparent 0%,
-        black 20%,
-        black 75%,
-        transparent 100%
-    );
-    mask-image: linear-gradient(
-        to bottom,
-        transparent 0%,
-        black 20%,
-        black 75%,
-        transparent 100%
-    );
+    display: flex;
+    justify-content: center;
 }
 
-/* Content: origin at top center — text starts large at bottom, shrinks as it rises */
+/* Top fade — black gradient sells the vanishing point */
+.finale-scroll-track::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 55%;
+    background: linear-gradient(to bottom, rgba(0,0,0,1) 0%, transparent 100%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* The crawling content — transform-origin bottom, rotated to lean "away" */
 .finale-scroll-content {
     position: absolute;
-    left: 50%;
-    transform: translateX(-50%) rotateX(-35deg);
-    transform-origin: 50% 0%;
+    top: 0;
     width: 900px;
-    max-width: 95vw;
+    max-width: 92vw;
     text-align: center;
-    top: 100%;
-    padding: 15vh 0 50vh;
+    transform-origin: 50% 100%;
+    transform: rotateX(20deg);
+    /* JS controls `top` to scroll. Starts at 100% (off-screen below) */
 }
 
 /* Intro section */
 .finale-intro {
-    margin-bottom: 10rem;
+    margin-bottom: 14rem;
+    padding-top: 6rem;
 }
 
 .finale-trophy {
-    font-size: 6rem;
-    filter: drop-shadow(0 0 40px rgba(212, 175, 55, 0.5));
-    margin-bottom: 2rem;
+    font-size: 7rem;
+    filter: drop-shadow(0 0 50px rgba(212, 175, 55, 0.5));
+    margin-bottom: 2.5rem;
 }
 
 .finale-intro-text {
     font-family: 'Playfair Display', serif;
-    font-size: 3.2rem;
+    font-size: 4rem;
     font-style: italic;
-    color: rgba(212, 175, 55, 0.85);
-    letter-spacing: 0.06em;
+    color: var(--gold);
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
 }
 
 /* Winner rows */
 .finale-winners {
     display: flex;
     flex-direction: column;
-    gap: 5rem;
+    gap: 7rem;
 }
 
 .finale-winner-row {
@@ -1457,58 +1467,51 @@ body {
 
 .finale-winner-category {
     display: block;
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.3);
+    font-size: 1.4rem;
+    color: rgba(255, 255, 255, 0.35);
     text-transform: uppercase;
-    letter-spacing: 0.25em;
-    margin-bottom: 0.6rem;
+    letter-spacing: 0.3em;
+    margin-bottom: 0.5rem;
     transition: color 0.3s ease;
 }
 
 .finale-winner-name {
     display: inline-block;
     font-family: 'Playfair Display', serif;
-    font-size: 3.5rem;
+    font-size: 4.5rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #D4AF37, #F4E4B5, #D4AF37);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    transition: filter 0.3s ease, transform 0.3s ease;
-    filter: drop-shadow(0 0 0px transparent);
+    color: var(--gold);
+    text-shadow: 0 0 0px transparent;
+    transition: text-shadow 0.3s ease, transform 0.3s ease;
 }
 
 /* Hover glow */
 .finale-winner-row:hover .finale-winner-category {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.7);
 }
 .finale-winner-row:hover .finale-winner-name {
-    filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.6));
-    transform: scale(1.04);
+    text-shadow: 0 0 30px rgba(212, 175, 55, 0.7), 0 0 60px rgba(212, 175, 55, 0.3);
+    transform: scale(1.05);
 }
 
 /* Closing section */
 .finale-closing {
-    margin-top: 12rem;
-    padding-bottom: 8rem;
+    margin-top: 16rem;
+    padding-bottom: 12rem;
 }
 
 .finale-title {
     font-family: 'Playfair Display', serif;
-    font-size: 5.5rem;
+    font-size: 6.5rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #D4AF37, #F4E4B5, #D4AF37, #B8960C);
-    background-size: 300% 300%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: goldShimmer 4s ease-in-out infinite;
+    color: var(--gold);
+    text-shadow: 0 0 50px rgba(212, 175, 55, 0.4);
     letter-spacing: 0.02em;
 }
 
 .finale-subtitle {
     font-family: 'Playfair Display', serif;
-    font-size: 1.8rem;
+    font-size: 2.2rem;
     color: rgba(212, 175, 55, 0.6);
     font-style: italic;
     letter-spacing: 0.15em;
@@ -1518,7 +1521,7 @@ body {
 
 .finale-status {
     margin-top: 2.5rem;
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: rgba(255, 255, 255, 0.4);
     transition: color 0.4s ease;
 }
@@ -1527,12 +1530,7 @@ body {
 .finale-thanks {
     margin-top: 4rem;
     font-family: 'Playfair Display', serif;
-    font-size: 1.6rem;
+    font-size: 2rem;
     color: rgba(255, 255, 255, 0.5);
     font-style: italic;
-}
-
-@keyframes goldShimmer {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
 }

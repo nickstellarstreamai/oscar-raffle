@@ -1501,12 +1501,16 @@ class OscarRaffle {
     }
 
     startCreditsScroll(scrollContent) {
+        // Set initial position off-screen below
+        const viewHeight = window.innerHeight;
+        scrollContent.style.top = viewHeight + 'px';
+
         requestAnimationFrame(() => {
             const contentHeight = scrollContent.scrollHeight;
-            const viewHeight = window.innerHeight;
-            const totalDistance = contentHeight + viewHeight * 0.5;
-            const BASE_SPEED = 0.6;
-            let scrollPos = 0;
+            // Scroll from viewHeight (below screen) to negative contentHeight (fully past top)
+            const totalDistance = contentHeight + viewHeight;
+            const BASE_SPEED = 0.7;
+            let currentTop = viewHeight; // start below viewport
             let startTime = null;
             const DELAY = 1500;
 
@@ -1523,24 +1527,22 @@ class OscarRaffle {
                 const elapsed = timestamp - startTime;
 
                 if (elapsed > DELAY) {
-                    // Mouse in top 20% = scroll backward, bottom 20% = scroll faster, middle = normal
                     const ratio = mouseY / viewHeight;
                     let speed;
                     if (ratio < 0.15) {
-                        // Top zone: reverse scroll (faster the higher)
                         speed = -BASE_SPEED * (2 - ratio / 0.15);
                     } else if (ratio > 0.85) {
-                        // Bottom zone: speed up
                         speed = BASE_SPEED * (1 + (ratio - 0.85) / 0.15 * 2);
                     } else {
                         speed = BASE_SPEED;
                     }
-                    scrollPos = Math.max(0, scrollPos + speed);
+                    currentTop = Math.min(viewHeight, currentTop - speed);
                 }
 
-                scrollContent.style.top = `calc(100% - ${scrollPos}px)`;
+                scrollContent.style.top = currentTop + 'px';
 
-                if (scrollPos < totalDistance) {
+                // Stop when the closing section is roughly centered
+                if (currentTop > -contentHeight) {
                     this._creditsAnimId = requestAnimationFrame(scroll);
                 }
             };
