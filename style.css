@@ -1388,103 +1388,114 @@ body {
     background: rgba(212, 175, 55, 0.1);
 }
 
-/* Scroll track — the perspective container */
+/* Scroll track — perspective container, origin at TOP so text recedes upward */
 .finale-scroll-track {
     position: absolute;
     inset: 0;
     z-index: 1;
-    perspective: 350px;
+    perspective: 300px;
     overflow: hidden;
-    /* Top/bottom fade masks */
     -webkit-mask-image: linear-gradient(
         to bottom,
         transparent 0%,
-        black 15%,
-        black 85%,
+        black 20%,
+        black 75%,
         transparent 100%
     );
     mask-image: linear-gradient(
         to bottom,
         transparent 0%,
-        black 15%,
-        black 85%,
+        black 20%,
+        black 75%,
         transparent 100%
     );
 }
 
-/* The actual scrolling content — starts below screen, translates up */
+/* Content: origin at top center — text starts large at bottom, shrinks as it rises */
 .finale-scroll-content {
     position: absolute;
     left: 50%;
-    transform: translateX(-50%) rotateX(25deg);
-    transform-origin: 50% 100%;
-    width: 700px;
-    max-width: 90vw;
+    transform: translateX(-50%) rotateX(-35deg);
+    transform-origin: 50% 0%;
+    width: 900px;
+    max-width: 95vw;
     text-align: center;
-    /* JS will animate translateY via top */
     top: 100%;
-    padding: 10vh 0 40vh;
+    padding: 15vh 0 50vh;
 }
 
 /* Intro section */
 .finale-intro {
-    margin-bottom: 6rem;
+    margin-bottom: 10rem;
 }
 
 .finale-trophy {
-    font-size: 4.5rem;
-    filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.4));
-    margin-bottom: 1.5rem;
+    font-size: 6rem;
+    filter: drop-shadow(0 0 40px rgba(212, 175, 55, 0.5));
+    margin-bottom: 2rem;
 }
 
 .finale-intro-text {
     font-family: 'Playfair Display', serif;
-    font-size: 2rem;
+    font-size: 3.2rem;
     font-style: italic;
-    color: rgba(212, 175, 55, 0.8);
-    letter-spacing: 0.08em;
+    color: rgba(212, 175, 55, 0.85);
+    letter-spacing: 0.06em;
 }
 
 /* Winner rows */
 .finale-winners {
     display: flex;
     flex-direction: column;
-    gap: 2.5rem;
+    gap: 5rem;
 }
 
 .finale-winner-row {
     text-align: center;
+    cursor: default;
 }
 
 .finale-winner-category {
     display: block;
-    font-size: 0.75rem;
+    font-size: 1.1rem;
     color: rgba(255, 255, 255, 0.3);
     text-transform: uppercase;
-    letter-spacing: 0.2em;
-    margin-bottom: 0.4rem;
+    letter-spacing: 0.25em;
+    margin-bottom: 0.6rem;
+    transition: color 0.3s ease;
 }
 
 .finale-winner-name {
-    display: block;
+    display: inline-block;
     font-family: 'Playfair Display', serif;
-    font-size: 1.6rem;
+    font-size: 3.5rem;
     font-weight: 700;
     background: linear-gradient(135deg, #D4AF37, #F4E4B5, #D4AF37);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    transition: filter 0.3s ease, transform 0.3s ease;
+    filter: drop-shadow(0 0 0px transparent);
+}
+
+/* Hover glow */
+.finale-winner-row:hover .finale-winner-category {
+    color: rgba(255, 255, 255, 0.6);
+}
+.finale-winner-row:hover .finale-winner-name {
+    filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.6));
+    transform: scale(1.04);
 }
 
 /* Closing section */
 .finale-closing {
-    margin-top: 8rem;
-    padding-bottom: 5rem;
+    margin-top: 12rem;
+    padding-bottom: 8rem;
 }
 
 .finale-title {
     font-family: 'Playfair Display', serif;
-    font-size: 4rem;
+    font-size: 5.5rem;
     font-weight: 700;
     background: linear-gradient(135deg, #D4AF37, #F4E4B5, #D4AF37, #B8960C);
     background-size: 300% 300%;
@@ -1497,26 +1508,26 @@ body {
 
 .finale-subtitle {
     font-family: 'Playfair Display', serif;
-    font-size: 1.3rem;
+    font-size: 1.8rem;
     color: rgba(212, 175, 55, 0.6);
     font-style: italic;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
 }
 
 .finale-status {
-    margin-top: 2rem;
-    font-size: 0.85rem;
+    margin-top: 2.5rem;
+    font-size: 1rem;
     color: rgba(255, 255, 255, 0.4);
     transition: color 0.4s ease;
 }
 .finale-status.saved { color: var(--gold); }
 
 .finale-thanks {
-    margin-top: 3rem;
+    margin-top: 4rem;
     font-family: 'Playfair Display', serif;
-    font-size: 1.2rem;
+    font-size: 1.6rem;
     color: rgba(255, 255, 255, 0.5);
     font-style: italic;
 }

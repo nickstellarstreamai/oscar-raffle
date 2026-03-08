@@ -1448,6 +1448,7 @@ class OscarRaffle {
         closeBtn.onclick = () => {
             if (this._finaleAnimId) cancelAnimationFrame(this._finaleAnimId);
             if (this._creditsAnimId) cancelAnimationFrame(this._creditsAnimId);
+            if (this._finaleCleanups) { this._finaleCleanups.forEach(fn => fn()); this._finaleCleanups = []; }
             overlay.classList.remove('visible');
             setTimeout(() => {
                 overlay.classList.add('hidden');
@@ -1500,23 +1501,41 @@ class OscarRaffle {
     }
 
     startCreditsScroll(scrollContent) {
-        // Wait for layout then measure
         requestAnimationFrame(() => {
             const contentHeight = scrollContent.scrollHeight;
             const viewHeight = window.innerHeight;
-            // Total distance: start from bottom of screen, scroll until closing section is centered
-            const totalDistance = contentHeight + viewHeight * 0.3;
-            const SCROLL_SPEED = 0.55; // pixels per frame (~33px/sec at 60fps)
+            const totalDistance = contentHeight + viewHeight * 0.5;
+            const BASE_SPEED = 0.6;
             let scrollPos = 0;
             let startTime = null;
-            const DELAY = 1500; // ms before scroll begins
+            const DELAY = 1500;
+
+            // Mouse position tracking for scroll speed control
+            let mouseY = viewHeight / 2;
+            const overlay = document.getElementById('finale-overlay');
+            const onMouseMove = (e) => { mouseY = e.clientY; };
+            overlay.addEventListener('mousemove', onMouseMove);
+            this._finaleCleanups = this._finaleCleanups || [];
+            this._finaleCleanups.push(() => overlay.removeEventListener('mousemove', onMouseMove));
 
             const scroll = (timestamp) => {
                 if (!startTime) startTime = timestamp;
                 const elapsed = timestamp - startTime;
 
                 if (elapsed > DELAY) {
-                    scrollPos += SCROLL_SPEED;
+                    // Mouse in top 20% = scroll backward, bottom 20% = scroll faster, middle = normal
+                    const ratio = mouseY / viewHeight;
+                    let speed;
+                    if (ratio < 0.15) {
+                        // Top zone: reverse scroll (faster the higher)
+                        speed = -BASE_SPEED * (2 - ratio / 0.15);
+                    } else if (ratio > 0.85) {
+                        // Bottom zone: speed up
+                        speed = BASE_SPEED * (1 + (ratio - 0.85) / 0.15 * 2);
+                    } else {
+                        speed = BASE_SPEED;
+                    }
+                    scrollPos = Math.max(0, scrollPos + speed);
                 }
 
                 scrollContent.style.top = `calc(100% - ${scrollPos}px)`;
